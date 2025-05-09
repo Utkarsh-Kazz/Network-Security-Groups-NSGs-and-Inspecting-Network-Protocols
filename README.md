@@ -28,29 +28,23 @@ In this tutorial, we will observe various network traffic to and from Azure Virt
 </br>
 </br>
 <h3 align="center">
-  Set up your virtual environment
+  Set up the virtual environment
 </h3>
 </br>
 <p>
-  First, let's create our Resource Group inside our Azure subscription.
+  First, I created a Resource Group in my Azure subscription to organize all related resources.
 </p>
 <p>
   <img src="https://i.imgur.com/dOAeXqs.png" height="75%" width="100%" alt="Resource Group"/>
 </p>
 <p>
-  Now create your Windows virtual machine. I typically create the VM in (US) East US.
-</p>
-<p>
-  While creating the VM, select the previously created Resource Group and allow it to create a new Virtual Network (Vnet) and Subnet. Make sure to use the password option under the <strong>Administrator Account</strong> section:
+ Then, I deployed a Windows 10 virtual machine, selecting the previously created Resource Group and allowing Azure to generate a new Virtual Network (VNet) and Subnet. I used the password authentication option for the administrator account.
 </p>
 <p>
   <img src="https://i.imgur.com/PHOwjLh.png" height="75%" width="100%" alt="Windows VM"/>
 </p>
 <p>
-  Create an Ubuntu virtual machine.
-</p>
-<p>
-  While creating the VM, select the previously created Resource Group and allow it to create a new Virtual Network (Vnet) and Subnet. Make sure to use the password option under the <strong>Administrator Account</strong> section (not seen in image):
+ Next, I created a Linux (Ubuntu) virtual machine, again using the same Resource Group and allowing Azure to manage the networking components. Password authentication was selected here as well.
 </p>
 <p>
   <img src="https://i.imgur.com/N5zwQUH.png" height="75%" width="100%" alt="Ubuntu VM"/>
@@ -64,43 +58,43 @@ In this tutorial, we will observe various network traffic to and from Azure Virt
 <br />
 <br />
 <h3 align="center">
-  Now let's observe some ICMP traffic
+  Monitor ICMP Traffic with Wireshark
 </h3>
 <br />
 <p>
-  Remote into your Windows 10 Virtual Machine, install Wireshark, open it and filter for ICMP traffic only.
+ I connected to the Windows VM via Remote Desktop, installed Wireshark, and applied a filter to display ICMP traffic only.
 </p>
 <p>
   <img src="https://i.imgur.com/0BsfNiS.jpg" height="75%" width="100%" alt="Microsoft Remote Desktop - Mac"/>
 </p>
 <p>
-  Retrieve the private IP address of the Ubuntu VM and attempt to ping it from within the Windows 10 VM. Observe ping requests and replies within WireShark:
+ From the Windows machine, I located the private IP address of the Ubuntu VM and sent ping requests to it. I was able to observe both requests and replies in Wireshark, confirming successful communication over the private network.
 </p>
 <p>
   <img src="https://i.imgur.com/yYGKuAy.png" height="75%" width="100%" alt="Ubuntu private IP"/>
   <img src="https://i.imgur.com/3h9QSEY.png" height="75%" width="100%" alt="ICMP traffic - private IP"/>
 </p>
 <p>
-  Attempt to ping a public website (such as www.google.com) and observe the traffic in WireShark:
+ I also pinged a public site like www.google.com, and Wireshark displayed ICMP packets showing traffic going out to the internet and returning responses.
 </p>
 <p>
   <img src="https://i.imgur.com/YduMvc7.png" height="75%" width="100%" alt="ICMP traffic - public IP"/>
 </p>
 <p>
-  Initiate a perpetual/non-stop ping from your Windows 10 VM to your Ubuntu VM:
+ To simulate continuous monitoring, I initiated a perpetual ping to the Ubuntu VM from the Windows command line and watched the constant flow of ICMP packets in Wireshark.
 </p>
 <p>
   <img src="https://i.imgur.com/bihftKK.png" height="75%" width="100%" alt="ICMP traffic - perpetual ping"/>
 </p>
 <p>
-  Open the Network Security Group your Ubuntu VM is using and disable incoming (inbound) ICMP traffic, while back in the Windows 10 VM, observe the ICMP traffic in WireShark and the command line Ping activity:
+ I then navigated to the Ubuntu VM’s Network Security Group in the Azure portal and disabled inbound ICMP traffic by adding a new rule. Back on the Windows VM, I observed that ping replies stopped appearing, and Wireshark confirmed the lack of incoming traffic.
 </p>
 <p>
   <img src="https://i.imgur.com/ovGk5dq.png" height="75%" width="100%" alt="ICMP traffic - perpetual ping"/>
   <img src="https://i.imgur.com/NjuUANI.png" height="75%" width="100%" alt="ICMP traffic - ICMP denied"/>
 </p>
 <p>
-  Re-enable ICMP traffic for the Network Security Group in your Ubuntu VM and back in the Windows 10 VM, observe the ICMP traffic in WireShark and the command line ping activity (should start working again).Finally, stop the ping activity:
+  After that, I removed the ICMP block rule in the NSG, and the ping started responding again, which was visible both on the command line and in Wireshark.
 </p>
 <p>
   <img src="https://i.imgur.com/nZbl2sA.png" height="75%" width="100%" alt="ICMP traffic - ICMP re-enabled"/>
@@ -108,27 +102,22 @@ In this tutorial, we will observe various network traffic to and from Azure Virt
 <br />
 <br />
 <h3 align="center">
-  Time to observe SSH traffic
-</h3>
+Observe SSH Traffic</h3>
 <br />
 <p>
-  Back in Wireshark, filter for SSH traffic only and from your Windows 10 VM, “SSH into” your Ubuntu virtual machine (via its private IP address). Type commands (ls, pwd, etc) into the linux SSH connection and observe SSH traffic spam in WireShark.
-</p>
-</p>
-  Exit the SSH connection by typing ‘exit’ and pressing [return]:
+ In Wireshark, I changed the filter to display SSH traffic only. From the Windows VM, I SSH'd into the Ubuntu machine using its private IP. As I typed commands like ls and pwd, I saw SSH packet activity appear in Wireshark. I ended the SSH session by typing exit, closing the secure shell connection.
 </p>
   <img src="https://i.imgur.com/6YEDJKu.png" height="75%" width="100%" alt="SSH traffic"/>
 <p>
 <br />
 <br />
 <h3 align="center">
-  Next, we're going to observe DHCP Traffic
-</h3>
+Analyze DHCP Traffic</h3>
 <br />
 <p>
-  Back in Wireshark, filter for DHCP traffic only. From your Windows 10 VM, attempt to issue your VM a new IP address from the command line (ipconfig /renew)
-</p>
-Observe the DHCP traffic appearing in WireShark:
+ I updated the Wireshark filter to capture DHCP traffic.
+ On the Windows VM, I opened the command prompt and typed ipconfig /renew to request a new IP address from the DHCP server.
+ In Wireshark, I observed the DHCP request and response process, showing the renewal of the machine’s IP address.
 </p>
 <p>
   <img src="https://i.imgur.com/mKyAHFr.png" height="75%" width="100%" alt="DHCP traffic"/>
@@ -136,14 +125,12 @@ Observe the DHCP traffic appearing in WireShark:
 <br />
 <br />
 <h3 align="center">
-  Let's now observe our DNS traffic next
+  Inspect DNS Traffic
 </h3>
 <br />
 <p>
-  Back in Wireshark, filter for DNS traffic only.
-</p>
-<p>
-  From your Windows 10 VM within a command line, use nslookup to see what google.com and disney.com’s IP addresses are and observe the DNS traffic being shown in WireShark:
+  With Wireshark now set to display DNS packets, I used the nslookup command in the Windows command line to query the IP addresses of google.com and disney.com.
+Each query generated visible DNS traffic in Wireshark, showing resolution requests and the resulting IP addresses.
 </p>
 <p>
   <img src="https://i.imgur.com/mYZ8CAK.png" height="75%" width="100%" alt="DNS traffic"/>
@@ -151,25 +138,18 @@ Observe the DHCP traffic appearing in WireShark:
 <br />
 <br />
 <h3 align="center">
-  Finally, we will observe RDP traffic to finish up this tutorial
+Review RDP Traffic
 </h3>
 <br />
 <p>
-  Back in Wireshark, filter for RDP traffic only using "tcp.port==3389".
-</p>
-<p>
-  You'll be obseving a non-stop stream of traffic. Do you know why there is constant traffic in our tcp.port==3389?
-</p>
-<p>
-  The answer is because the RDP (protocol) is constantly showing you a live stream from one computer to another, therefor traffic is always being transmitted:
+  Lastly, I filtered Wireshark to show RDP traffic only using the expression tcp.port==3389.
+  I noticed a constant stream of RDP packets, which is expected because Remote Desktop Protocol continuously sends data to maintain a live visual connection between the 
+  host and client.
 </p>
 <p>
   <img src="https://i.imgur.com/hNlhTVp.png" height="75%" width="100%" alt="RDP traffic"/>
 </p>
 <p>
-  Now that we're finished observing the network, DON'T FORGET TO CLEAN UP YOUR AZURE ENVIRONMENT! This will prevent you from incurring additional charges and you won't be left surprised!
-</p>
-<p>
-  Close your Remote Desktop connection, delete the Resource Group(s) created at the beginning of this tutorial, and verify Resource Group deletion. You'll typically be notified or can click unde the bell notification just to make sure.
-</p>
+ Clean up Azure Environment
+Once all observations were complete, I closed the Remote Desktop session, returned to the Azure portal, and deleted the Resource Group to ensure no lingering resources would incur extra charges.
 </p>
